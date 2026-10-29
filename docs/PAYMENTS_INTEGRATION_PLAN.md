@@ -4,18 +4,18 @@ Reviewed against `instructions.md`, the existing website source, the installed W
 
 ## What the checkout warning meant
 
-The checkout modal showed that warning because all three Whop plan IDs were blank in `website/src/site-config.ts`. The three one-time variants are now created and configured. The estimate API documentation marks `user_id` nullable, but the live request with `user_id: null` returned `user_id is required`. The demo route now sends the signed-in business owner's ID as a temporary fallback. This will attribute every request to the owner, not the visitor; replace it with visitor OAuth or a Whop-supported guest Lead flow before accepting real prospects.
+The checkout modal originally showed a missing-plan warning because all three Whop plan IDs were blank. The plans are now configured. The Leads API schema marks `user_id` nullable, but a live anonymous request returned `user_id is required`; a business owner's ID would incorrectly attribute a homeowner's Lead to the owner. The route now uses a verified Whop OAuth/OIDC `sub` after the visitor signs in. Email remains contact metadata and is not used as identity.
 
 ## Implementation status
 
-The source is deployed to the connected Whop Website, and the business, product, and three plan IDs are configured. The Leads route has a temporary hardcoded owner identity; a successful Lead submission has not yet been verified. Checkout and the complete payment/invoice sequence are not yet account-verified.
+The site is deployed to the connected Whop Website, and the business, product, and three plan IDs are configured. The OAuth callback is configured in Whop and the invoice admin key is stored as an encrypted app secret. OAuth, Lead creation, checkout, and the complete payment/invoice sequence are not yet account-verified.
 
 - The plan checkout uses Whop's hosted `CheckoutElement` or `ExpressCheckoutElement` path. The installed Elements API documents these as an exclusive checkout entry slot, so the modal switches between standard checkout and Apple Pay/Google Pay. PayPal is disabled. `BrandingElement` is mounted with the setup-mode `PaymentElement`; Whop's full checkout surface owns its own payment/terms rendering.
 - After Whop reports checkout completion, the server retrieves the payment and requires the configured $500 deposit plan and a `paid` state before the modal opens card setup.
 - The homeowner explicitly consents to save a payment method. The site creates a Whop setup intent, handles a required next action, and checks setup status. The setup intent metadata records the deposit payment ID; the method ID is not returned to browser code.
-- `/admin/invoices` is the contractor tool. The server validates the paid deposit again, validates the positive final balance in USD cents, and creates a `send_invoice` invoice with the required collection method, plan/product, line item, and due date. Whop emails the customer and the tool returns its payment URL. This version intentionally uses manual payment rather than auto-charge.
+- `/admin/invoices` is the contractor tool. The server validates the paid deposit, business, and buyer email again, validates the positive final balance in USD cents, and creates a `send_invoice` invoice with the required collection method, plan/product, line item, and due date. Whop emails the customer and the tool returns its payment URL. This version intentionally uses manual payment rather than auto-charge.
 - If `site.invoiceProductId` is set, invoices reuse that product. Otherwise the API creates an inline invoice product.
-- Financing still depends on Whop merchant approval and buyer/purchase eligibility. The code cannot enable or promise a provider.
+- Financing still depends on Whop merchant approval and buyer/purchase eligibility. The code cannot enable or promise a provider. Elements SDK sandbox support exists in types, but Whop currently labels sandbox as not generally available; the live plans use production and no test payment has been completed.
 
 ## Implementation sequence
 
@@ -45,7 +45,9 @@ The source implements contractor-only invoice creation at `/api/admin/final-invo
 
 **Code condition: done. Account exit condition:** create an invoice on the connected Whop business and verify the email and Whop payment URL. Add auto-charge only if the business specifically needs it and the account flow provides all required stored-method/token values.
 
-### 5. Financing, tracking, and proof
+### 5. Leads, financing, tracking, and proof
+
+The estimate route now obtains the visitor's Whop user ID by OAuth/OIDC + PKCE and uses it for the Leads API call. The homeowner's supplied email remains the contact address in metadata. This requires the visitor to have a Whop account and authorize sign-in, which is a real UX constraint for a general consumer roofing site. Verify the OAuth callback and that a submitted lead appears in the connected business before claiming the Lead API path is complete.
 
 Apply for financing in the Whop dashboard. Whop documents financing as appearing automatically at checkout after merchant approval when the method and buyer are eligible; no front-end flag can force it on. Verify eligible options on the actual merchant account and the actual checkout amounts. Keep site wording conditional and avoid promising a particular lender or approval.
 
@@ -57,7 +59,7 @@ Verify `estimate_requested`, `service_viewed`, and `deposit_started` in the Whop
 
 1. Local typecheck/build after implementation.
 2. Whop preview deployment, then verify the hosted runtime has account context and protected secrets.
-3. Complete a Whop sandbox/test checkout using Elements and BrandingElement if sandbox access is enabled for the business. If it is not enabled, stop before charging a real customer; request Whop sandbox access or use a clearly authorized internal test transaction.
+3. Complete a Whop sandbox/test checkout using Elements and BrandingElement only after Whop enables sandbox access and matching test plans/API access for the business. The current live checkout is production; do not use real customer payment details as test data.
 4. Verify the successful deposit, saved method/setup intent, and final invoice in the business dashboard/API.
 5. Verify the lead and custom pixel events, then record the 3–5 minute demo.
 
@@ -71,6 +73,6 @@ Verify `estimate_requested`, `service_viewed`, and `deposit_started` in the Whop
 - [Create lead API](https://docs.whop.com/api-reference/leads/create-lead)
 - [Financing options](https://docs.whop.com/payments-and-billing/financing/all-bnpl-options) and [financing application](https://docs.whop.com/payments-and-billing/financing/apply)
 
-## Not included in this plan
+## Remaining account gates
 
-The user ID correction for the estimate Leads API needs its own decision/implementation. Do not ask public homeowners to guess a Whop ID; first verify a guest-compatible lead flow or implement a proper supported Whop visitor OAuth flow. It is independent of the deposit, checkout, and invoice implementation.
+Sandbox is not generally available per the installed Whop Elements types. The business must confirm access and matching sandbox credentials/plans. OAuth sign-in and Lead creation also need a real user-authorized run. Deposit checkout, setup intent, invoice creation, and event tracking need account-level verification; do not mark these done until observed in Whop.

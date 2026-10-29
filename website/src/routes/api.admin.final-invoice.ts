@@ -16,7 +16,8 @@ export const Route = createFileRoute('/api/admin/final-invoice')({
           if (!customerName?.trim() || !email?.includes('@') || !depositPaymentId || !/^pay_[a-zA-Z0-9]+$/.test(depositPaymentId) || !Number.isSafeInteger(amount) || (amount || 0) < 1) return Response.json({ error: 'Customer name, email, deposit payment ID, and final balance in USD cents are required.' }, { status: 400 })
           if (!plans.deposit.id) return Response.json({ error: 'Configure the Whop deposit plan before creating final invoices.' }, { status: 503 })
           const deposit = await whopGet(`/payments/${depositPaymentId}`)
-          if (deposit.status !== 'paid' || deposit.plan?.id !== plans.deposit.id) return Response.json({ error: 'The invoice must reference a completed project deposit.' }, { status: 409 })
+          if (deposit.status !== 'paid' || deposit.plan?.id !== plans.deposit.id || deposit.company?.id !== (process.env.WHOP_ACCOUNT_ID || site.accountId)) return Response.json({ error: 'The invoice must reference a completed project deposit from this Whop business.' }, { status: 409 })
+          if (!deposit.user?.email || deposit.user.email.toLowerCase() !== email.trim().toLowerCase()) return Response.json({ error: 'Invoice email must match the customer email on the deposit payment.' }, { status: 409 })
           const finalBalance = (amount as number) / 100
           const invoiceBody = {
             collection_method: 'send_invoice',

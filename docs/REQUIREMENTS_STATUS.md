@@ -25,12 +25,13 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 | Disable PayPal in the Express Checkout configuration | done |
 | Surface financing options for eligible approved merchants | not done |
 | Complete a sandbox checkout using Whop Elements and BrandingElement | not done |
-| Use a temporary hardcoded business-owner user ID for demo Leads submissions | done |
-| Implement estimate submission to the Whop Leads API using an authenticated visitor identity | not done |
+| Use a temporary hardcoded business-owner user ID for demo Leads submissions | not done |
+| Implement estimate submission to the Whop Leads API using a visitor's authenticated Whop identity (OAuth/OIDC + PKCE) | done |
+| Configure the OAuth callback URL on the Whop app | done |
 | Verify a submitted estimate appears as a Lead in the connected Whop account | not done |
 | Create a Whop setup intent to save a method after the deposit checkout | done |
 | Create the final Whop invoice for manual payment or auto-charge | done |
-| Configure `WHOP_INVOICE_ADMIN_SECRET` so `/admin/invoices` can call the invoice API | not done |
+| Configure `WHOP_INVOICE_ADMIN_SECRET` so `/admin/invoices` can call the invoice API | done |
 | Complete and verify the deposit → saved method → final invoice flow in Whop | not done |
 | Call `whop.track` for `estimate_requested`, `service_viewed`, and `deposit_started` | done |
 | Verify all three custom events in Whop tracking | not done |
@@ -48,6 +49,8 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 
 ## Whop feature summary
 
-The live Whop Website is [boomerang-roofing.whop.site](https://boomerang-roofing.whop.site) (app `app_8YZgDz7emvrsE0`). The CLI quickstart documents `whop.site` or a custom domain, not a `whop.app` hostname. Real one-time Whop plans are configured for the $149 roof inspection (`plan_OSx3AsLPE0dFZ`), $500 project deposit (`plan_icqTxoMo6e35c`), and $299 leak repair visit (`plan_KIjflGrjbykJC`). Source includes Whop Elements checkout with Apple Pay/Google Pay Express Checkout, a post-deposit setup-intent flow with customer consent and server status verification, a contractor-only manual invoice tool using the Whop Invoices API, estimate Lead submission, and the three custom pixel events. The invoice page is not enabled because `WHOP_INVOICE_ADMIN_SECRET` is not configured. Payment onboarding, Leads API result, checkout, setup intent, invoice, financing approval, and pixel-event verification remain account-level gates. Automatic invoice charges are intentionally not included; the implemented invoice collection method is `send_invoice` and does not use the saved card.
+The live Whop Website is [boomerang-roofing.whop.site](https://boomerang-roofing.whop.site) (app `app_8YZgDz7emvrsE0`). The CLI quickstart documents `whop.site` or a custom domain, not a `whop.app` hostname. Real one-time Whop plans are configured for the $149 roof inspection (`plan_OSx3AsLPE0dFZ`), $500 project deposit (`plan_icqTxoMo6e35c`), and $299 leak repair visit (`plan_KIjflGrjbykJC`). Source includes Whop Elements checkout with Apple Pay/Google Pay Express Checkout, a post-deposit setup-intent flow with customer consent and server status verification, a contractor-only manual invoice tool using the Whop Invoices API, Whop OAuth/OIDC identity for estimate Leads, and the three custom pixel events. `WHOP_INVOICE_ADMIN_SECRET` is configured as an encrypted Whop app secret. The checkout currently targets production, not sandbox; Whop's installed Elements SDK documents `environment: "sandbox"` but also says sandbox is not generally available. No checkout, setup intent, Lead, invoice, financing approval, or pixel event has been verified end-to-end in the account. Automatic invoice charges are not included; the implemented invoice collection method is `send_invoice` and does not use the saved card.
 
-The Leads route temporarily uses the signed-in business owner's Whop user ID (`user_EdlbQktpqyGJu`) so demo submissions can pass a non-null identity. Every submission is therefore attributed to the owner, not the actual homeowner. Replace it with visitor OAuth before using the form with real prospects; do not mark anonymous/customer Leads verified until a successful test appears in the account.
+The Leads API's `user_id` is a Whop user identifier (`user_…`), never an email address. The public API schema calls it nullable and says authenticated identity is used automatically, while a prior live anonymous request returned `user_id is required`. The form now asks the visitor to sign in with Whop using OAuth/OIDC + PKCE and sends that verified `sub` as `user_id`; the homeowner email remains contact information in Lead metadata. The Whop app's callback URI is configured, but OAuth, Lead creation, and appearance in the business dashboard still require end-to-end verification. Homeowners need a Whop account and must authorize the app for this Leads flow.
+
+The manual invoice endpoint now checks the completed deposit's plan, business, and buyer email before creating an invoice. It sends the final balance to the same buyer email with `collection_method: "send_invoice"`. Card-on-file setup remains separate and is not charged by this manual invoice; automatic charge would require a stored `payment_method_id` and payment token per the Invoices API.
