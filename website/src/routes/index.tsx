@@ -60,8 +60,8 @@ function Home() {
       track('estimate_requested', { service: payload.service, postal_code: payload.postalCode })
       setEstimateState('sent')
       formElement.reset()
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Please try again.')
+    } catch {
+      setErrorMessage('We couldn’t send your request online. Please email us directly.')
       setEstimateState('error')
     }
   }
@@ -134,7 +134,7 @@ function Home() {
           <PriceCard name="Project deposit" price="$500" note="One-time · credited toward your approved scope" button="Start a project" onClick={startDeposit} featured />
           <PriceCard name={plans.flat.name} price={`$${plans.flat.price}`} note={`One-time · ${plans.flat.description}`} button="Book this service" onClick={() => setModalPlan('flat')} />
         </div>
-        <p className="mt-5 max-w-3xl text-xs leading-relaxed text-ink/55">Template pricing: confirm local rates, taxes, deposit terms, cancellation policy, and the exact work included before publishing. Financing options, if offered, depend on merchant approval, customer eligibility, and provider availability.</p>
+        <p className="mt-5 max-w-3xl text-xs leading-relaxed text-ink/55">Demo pricing and service area are examples. Confirm the covered work, local taxes, deposit terms, and cancellation policy with the roofing business before launch. Financing availability depends on merchant approval and customer eligibility.</p>
       </section>
 
       <section id="financing" className="section-wrap grid gap-10 py-24 md:grid-cols-2 md:items-end md:py-32">
@@ -147,13 +147,17 @@ function Home() {
       </section>
 
       <section id="reviews" className="section-wrap bg-[#F4F3F3] px-4 py-24 sm:px-6 md:px-8 md:py-32">
-        <SectionIntro eyebrow="BUILT ON TRUST" title={<>Work you can feel<br />good about.</>} body="A roofing project should come with clear communication and a clean job site. Replace these prompts with verified customer feedback before publishing." />
-        <div className="mt-12 grid gap-4 md:grid-cols-3">{site.reviewPrompts.map((item, index) => <blockquote key={item} className="border-t border-ink/20 pt-5"><p className="font-serif text-xl leading-snug">“{item}”</p><footer className="mt-6 text-xs uppercase tracking-[0.15em] text-ink/50">Verified customer review {index + 1}</footer></blockquote>)}</div>
-        <div className="mt-14 grid gap-5 border-y border-ink/15 py-6 text-sm text-ink/70 sm:grid-cols-3"><p>Licensed & insured <span className="block text-xs">Add local license details</span></p><p>Workmanship warranty <span className="block text-xs">Add actual warranty terms</span></p><p>Local crew, clear scope <span className="block text-xs">Customize for your business</span></p></div>
+        <SectionIntro eyebrow="BUILT ON TRUST" title={<>Work you can feel<br />good about.</>} body="Know what we find, what we recommend, and what the work will cost before the crew gets started." />
+        <div className="mt-12 grid gap-4 md:grid-cols-3">{[
+          ['A closer look', 'An inspection helps identify visible roof concerns and the next steps to consider.'],
+          ['A clear scope', 'Review the proposed work, materials, and price before approving a project.'],
+          ['Your approval first', 'If the scope changes, discuss the added work and cost before proceeding.'],
+        ].map(([title, text]) => <article key={title} className="border-t border-ink/20 pt-5"><h3 className="font-serif text-xl leading-snug">{title}</h3><p className="mt-3 max-w-sm text-sm leading-relaxed text-ink/65">{text}</p></article>)}</div>
+        <div className="mt-14 grid gap-5 border-y border-ink/15 py-6 text-sm text-ink/70 sm:grid-cols-3"><p>Credentials<span className="block text-xs">Ask for current license and insurance details.</span></p><p>Warranty terms<span className="block text-xs">Review the applicable terms in the written proposal.</span></p><p>Service location<span className="block text-xs">{site.area}</span></p></div>
       </section>
 
       <section id="contact" className="section-wrap grid gap-12 py-24 md:grid-cols-2 md:py-32">
-        <div><p className="micro">REQUEST AN ESTIMATE</p><h2 className="mt-4 max-w-md font-serif text-4xl leading-tight tracking-tight sm:text-5xl">Let’s take a look.</h2><p className="mt-5 max-w-sm text-sm leading-relaxed text-ink/65">Tell us a little about your roof. We’ll follow up to arrange an inspection and discuss the best next step.</p><p className="mt-8 text-sm text-ink/70">{site.phone}<br />{site.email}</p></div>
+        <div><p className="micro">REQUEST AN ESTIMATE</p><h2 className="mt-4 max-w-md font-serif text-4xl leading-tight tracking-tight sm:text-5xl">Let’s take a look.</h2><p className="mt-5 max-w-sm text-sm leading-relaxed text-ink/65">Tell us a little about your roof and we’ll discuss the next step.</p><p className="mt-8 text-sm text-ink/70">{site.phone}<br /><a className="underline underline-offset-4" href={`mailto:${site.email}`}>{site.email}</a></p></div>
         <form className="grid gap-4" onSubmit={submitEstimate}>
           <div className="grid gap-4 sm:grid-cols-2"><label className="field-label">Name<input required name="name" autoComplete="name" className="field" /></label><label className="field-label">Email<input required type="email" name="email" autoComplete="email" className="field" /></label></div>
           <div className="grid gap-4 sm:grid-cols-2"><label className="field-label">Phone<input name="phone" type="tel" autoComplete="tel" className="field" /></label><label className="field-label">ZIP code<input required name="postalCode" inputMode="numeric" autoComplete="postal-code" className="field" /></label></div>
@@ -161,7 +165,7 @@ function Home() {
           <label className="field-label">A few details<textarea name="details" rows={3} className="field resize-y" placeholder="Tell us what you’ve noticed…" /></label>
           <label className="flex items-start gap-3 text-xs leading-relaxed text-ink/60"><input type="checkbox" required className="mt-0.5 accent-ink" />I agree to be contacted about this estimate request.</label>
           <button disabled={estimateState === 'sending'} className="w-fit rounded-lg bg-ink px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-ink/90 disabled:opacity-50">{estimateState === 'sending' ? 'Sending…' : 'Send estimate request'}</button>
-          {estimateState === 'sent' && <p role="status" className="text-sm">Thanks — your request has been received.</p>}{estimateState === 'error' && <p role="alert" className="text-sm text-red-700">{errorMessage}</p>}
+          {estimateState === 'sent' && <p role="status" className="text-sm">Thanks — your request has been received.</p>}{estimateState === 'error' && <p role="alert" className="text-sm text-red-700">{errorMessage} <a className="underline underline-offset-4" href={`mailto:${site.email}`}>Email {site.email}</a>.</p>}
         </form>
       </section>
 

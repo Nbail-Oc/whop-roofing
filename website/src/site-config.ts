@@ -3,19 +3,14 @@
 export const site = {
   name: 'Boomerang Roofing',
   hero: 'Roof repair, replacement, and inspections from a local crew that treats your home with care.',
-  area: 'USA',
-  phone: '[Your phone number]',
-  email: 'hello@example.com',
+  area: 'Denver metro area, Colorado, USA',
+  phone: '(303) 555-0147 (demo number)',
+  email: 'thangenabil@gmail.com',
   accountId: 'biz_i7AWdtROMztPLW',
   leadProductId: 'prod_qlAtWqkVzmYze',
   invoiceProductId: 'prod_qlAtWqkVzmYze',
   heroVideo: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260715_090628_7052d8a6-a094-4341-a4a2-ad58493a67a9.mp4',
   checkoutUrl: '#contact',
-  reviewPrompts: [
-    'Replace with a real customer quote about communication and care.',
-    'Replace with a verified review for a recent repair or replacement.',
-    'Replace with a customer-approved quote about the finished project.',
-  ],
 } as const
 
 export const services = [
