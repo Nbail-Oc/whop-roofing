@@ -36,11 +36,12 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 
 | Requirement | Status |
 | --- | --- |
-| Include the source code in a ZIP archive | done |
+| Provide the source code in a GitHub repository or ZIP | done |
 | Provide a live URL | not done |
+| Push the source code to the requested GitHub repository | done |
 | Record the 3–5 minute end-to-end demo | not done |
 | Provide a paragraph listing implemented Whop features | done |
 
 ## Whop feature summary
 
-The source integrates Whop's hosted checkout and Apple Pay/Google Pay Elements, a post-deposit setup-intent flow for saving a payment method, protected server routes for estimate Leads and final-balance invoices, and custom pixel events for estimate requests, service views, and deposit starts. The Whop business, live plans, Lead submission, checkout, invoice, and event verification are not complete because the authenticated CLI account currently has no business account selected or created.
+The source integrates Whop's hosted checkout with Apple Pay/Google Pay Express Checkout, a post-deposit setup-intent flow with customer consent and server status verification, and a contractor-only manual invoice tool using the Whop Invoices API. It also includes estimate Lead submission code and the three custom pixel events. The live business, plans, Lead submission, checkout, invoice, financing approval, and event verification still need to be configured or verified in a connected Whop business. Automatic invoice charges are intentionally not included; the implemented invoice collection method is `send_invoice`.

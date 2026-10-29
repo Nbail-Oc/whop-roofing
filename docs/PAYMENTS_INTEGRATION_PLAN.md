@@ -6,16 +6,16 @@ Reviewed against `instructions.md`, the existing website source, the installed W
 
 The `Whop user ID` field is **not** an environment variable and it is not the roofing business's Whop ID. It asks for the individual homeowner's Whop user ID so the Leads API can attach a lead to that person. A homeowner will not normally know this value. Do not put the business ID, a made-up ID, or one shared ID in this field. The public form needs a supported visitor identity flow (Whop hosting docs point to OAuth) or a different supported way to create the lead. This is separate from checkout and invoicing and is not a prerequisite for the payment work below.
 
-## Current code versus the requested end-to-end flow
+## Implementation status
 
-The site already has Whop Elements packages, a plan-based checkout modal, a separate setup-mode PaymentElement, a setup-intent API route, and an admin-only invoice route. That is starter code, not a verified payment flow:
+The source now implements the local payment and manual-invoice sequence. It is not yet a live, account-verified flow because the authenticated Whop CLI has no business account and the business/product/plan IDs are blank.
 
-- Checkout currently switches between `CheckoutElement` and `ExpressCheckoutElement`; it does not show both together, and there is no `BrandingElement` in the plan checkout surface. Branding is present only in the separate card-save form.
-- The setup form appears only after a local checkout callback. The saved `payment_method_id` is returned to the browser and displayed as a success message, but is not persisted against a job/customer for invoice use.
-- The invoice handler does not send Whop's required `collection_method`. For `charge_automatically`, Whop also documents a required `payment_token_id`. The handler currently accepts a payment method ID from the request but does not collect or validate that token.
-- The invoice route has no contractor-facing admin UI; its bearer secret must never be sent to a visitor/browser.
-- The business ID and three plan IDs are blank. The CLI login is authenticated, but the account currently has no Whop business, so there are no real plans or live checkout credentials to test against.
-- The code offers Apple Pay and Google Pay only when available. It cannot grant financing approval or guarantee a financing method to a buyer.
+- The plan checkout uses Whop's hosted `CheckoutElement` or `ExpressCheckoutElement` path. The installed Elements API documents these as an exclusive checkout entry slot, so the modal switches between standard checkout and Apple Pay/Google Pay. PayPal is disabled. `BrandingElement` is mounted with the setup-mode `PaymentElement`; Whop's full checkout surface owns its own payment/terms rendering.
+- After Whop reports checkout completion, the server retrieves the payment and requires the configured $500 deposit plan and a `paid` state before the modal opens card setup.
+- The homeowner explicitly consents to save a payment method. The site creates a Whop setup intent, handles a required next action, and checks setup status. The setup intent metadata records the deposit payment ID; the method ID is not returned to browser code.
+- `/admin/invoices` is the contractor tool. The server validates the paid deposit again, validates the positive final balance in USD cents, and creates a `send_invoice` invoice with the required collection method, plan/product, line item, and due date. Whop emails the customer and the tool returns its payment URL. This version intentionally uses manual payment rather than auto-charge.
+- If `site.invoiceProductId` is set, invoices reuse that product. Otherwise the API creates an inline invoice product.
+- Financing still depends on Whop merchant approval and buyer/purchase eligibility. The code cannot enable or promise a provider.
 
 ## Implementation sequence
 
@@ -27,27 +27,23 @@ Before checkout testing, select/create the roofing business in Whop, finish busi
 
 ### 2. Finish the Whop checkout surface
 
-Use Whop's prebuilt Elements only. Implement the plan checkout with the standard checkout/payment element, express wallet element, and the required Whop branding element in the composition supported by the current Elements API. Keep PayPal disabled if the template is specifically presenting Apple Pay and Google Pay. Remove the current mutually exclusive wallet/full-checkout toggle if the supported layout allows both the express buttons and standard payment options in the same checkout.
+Use Whop's prebuilt Elements only. The source already provides the plan checkout with a choice between the standard checkout and express wallet element, keeping PayPal disabled. The installed Elements API documents the standard and express checkout elements as mutually exclusive in their entry slot. The setup-mode `PaymentElement` includes the required `BrandingElement`.
 
 Keep the card data entirely in Whop Elements. Route plan selection from the configured plan IDs; do not accept a price from the browser. Handle success, cancellation, decline, and any required next action distinctly. Do not treat a client-side completion callback alone as durable proof of a payment; reconcile completion through Whop's supported server confirmation/webhook path before marking a job paid.
 
-**Exit condition:** all three real plans open Whop Elements; Apple Pay/Google Pay render where Whop and the browser/domain allow them; successful and failed test outcomes are handled correctly; BrandingElement is mounted as required by the selected payment surface.
+**Code condition: done. Account exit condition:** all three real plans open Whop Elements; wallet options render where Whop and the browser/domain allow them; successful and failed outcomes are verified on the connected account.
 
 ### 3. Save a payment method as part of the deposit flow
 
-The intended outcome is a paid $500 deposit and a payment method the homeowner has explicitly agreed can be used for the final balance. Use Whop's supported `setupFutureUsage: "off_session"` path for a payment Elements charge if it produces the required reusable payment method for this use case. If Whop requires a separate setup intent, collect/confirm it immediately in the deposit flow with clear consent, then finish any required `handleNextAction` step and confirm the setup intent reached a successful state.
+The source implements a separate setup-mode `PaymentElement` immediately after Whop confirms the $500 deposit. It asks for clear consent, creates the setup intent server-side, handles any next action, and verifies success through Whop. The returned setup intent carries the deposit payment ID in Whop metadata; the customer sees the deposit payment reference for contractor follow-up. The current release does not auto-charge the stored method.
 
-Persist only the identifiers and job/customer association needed to invoice, server-side. The present browser-only `depositPaid` flag and returned payment-method ID do not survive a page reload or provide a trustworthy job record. Prefer the smallest existing Whop-backed storage/webhook path available in the account; do not put payment identifiers or admin credentials in local storage or a public request. Confirm whether Whop's setup-intent response yields the identifiers required by invoice auto-collection before implementing automatic charges.
-
-**Exit condition:** a completed deposit is linked to the right job/customer; the setup/payment method is confirmed reusable for off-session billing; consent and account records are available for the contractor.
+**Code condition: done. Account exit condition:** verify a real deposit followed by a successful setup intent on the connected business, including any required authentication step.
 
 ### 4. Correct the final-balance invoice flow
 
-Keep invoice creation contractor-only. Default to `send_invoice` for the safer manual-pay path: create the invoice with Whop's required invoice/product/plan details, `collection_method: "send_invoice"`, customer identity, line items, and due date; then show the returned Whop invoice/payment URL to the contractor so it can be sent to the customer.
+The source implements contractor-only invoice creation at `/api/admin/final-invoice`, with the `/admin/invoices` form as its interface. It validates the deposit, final balance, customer details, and uses `send_invoice`; auto-charge is not implemented. `WHOP_INVOICE_ADMIN_SECRET` is entered at runtime and is not committed or stored in the browser.
 
-Offer `charge_automatically` only when the homeowner gave clear authorization and the server has the exact valid stored-method and payment-token values Whop requires. Validate the final balance server-side in integer cents, prevent zero/negative values, and ensure invoice line-item totals match the invoiced plan total. Never let a public visitor choose an arbitrary amount or invoke the admin endpoint. Return a safe invoice summary, not secrets.
-
-**Exit condition:** create one manual final-balance invoice and verify its Whop pay URL; separately verify authorized auto-charge only if the account/API returns the required saved-method and payment-token values.
+**Code condition: done. Account exit condition:** create an invoice on the connected Whop business and verify the email and Whop payment URL. Add auto-charge only if the business specifically needs it and the account flow provides all required stored-method/token values.
 
 ### 5. Financing, tracking, and proof
 

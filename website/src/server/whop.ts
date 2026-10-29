@@ -1,24 +1,36 @@
 import { site } from '../site-config'
 
-const baseUrl = 'https://api.whop.com/api/v1'
+const baseUrl = `${(process.env.WHOP_API_ORIGIN || 'https://api.whop.com').replace(/\/+$/, '')}/api/v1`
 
 export function whopAccountId() {
   return process.env.WHOP_ACCOUNT_ID || site.accountId
 }
 
-export async function whopPost(path: string, body: Record<string, unknown>) {
+async function whopRequest(path: string, init: RequestInit = {}) {
   const apiKey = process.env.WHOP_API_KEY
   const accountId = whopAccountId()
-  if (!apiKey || !accountId) throw new Error('Whop is not connected. Set WHOP_API_KEY and WHOP_ACCOUNT_ID in the Whop app secrets.')
-  const response = await fetch(`${baseUrl}${path}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ account_id: accountId, ...body }),
-  })
+  if (!accountId) throw new Error('Set the public business ID in site-config.ts; Whop also injects WHOP_ACCOUNT_ID in its server runtime.')
+  if (!apiKey && !process.env.WHOP_API_ORIGIN) throw new Error('Whop API credentials are unavailable. Run this through `whop apps dev` or configure local credentials.')
+  const headers = new Headers(init.headers)
+  headers.set('Content-Type', 'application/json')
+  if (apiKey) headers.set('Authorization', `Bearer ${apiKey}`)
+  const response = await fetch(`${baseUrl}${path}`, { ...init, headers })
   const result = await response.json().catch(() => ({}))
   if (!response.ok) {
     const message = result?.error?.message || result?.message || `Whop API returned ${response.status}`
     throw new Error(message)
   }
   return result
+}
+
+export function whopPost(path: string, body: Record<string, unknown>, idempotencyKey?: string) {
+  return whopRequest(path, {
+    method: 'POST',
+    headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
+    body: JSON.stringify({ ...body, account_id: whopAccountId() }),
+  })
+}
+
+export function whopGet(path: string) {
+  return whopRequest(path, { method: 'GET' })
 }

@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { loadWhop } from '@whop/elements'
-import { BrandingElement, Checkout, CheckoutElement, ExpressCheckoutElement, PaymentElement, Payments, WhopElements, usePayments } from '@whop/elements-react'
+import { BrandingElement, Checkout, CheckoutElement, ExpressCheckoutElement, PaymentElement, Payments, WhopElements, usePayments, useWhop } from '@whop/elements-react'
 import { site, services, plans } from '../site-config'
 
 export const Route = createFileRoute('/')({ component: Home })
@@ -255,37 +255,67 @@ function BoomerangVideoBg() {
 function CheckoutModal({ planType, onClose }: { planType: string; onClose: () => void }) {
   const plan = plans[planType as keyof typeof plans]
   const [depositPaid, setDepositPaid] = useState(false)
+  const [depositPaymentId, setDepositPaymentId] = useState('')
+  const [depositStatus, setDepositStatus] = useState('')
   const [walletMode, setWalletMode] = useState(false)
+  async function verifyDeposit(paymentId: string) {
+    setDepositStatus('Confirming your deposit with Whop…')
+    try {
+      const response = await fetch('/api/payment-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentId }) })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Unable to verify the deposit.')
+      if (result.status === 'not_project_deposit') throw new Error('That payment is not the configured project deposit.')
+      if (result.status !== 'paid') throw new Error('Whop is still processing this payment. Please refresh this step in a moment.')
+      setDepositPaymentId(paymentId)
+      setDepositPaid(true)
+      setDepositStatus('')
+    } catch (error) {
+      setDepositStatus(error instanceof Error ? error.message : 'Unable to verify the deposit.')
+    }
+  }
   return <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-ink/45 p-4" role="dialog" aria-modal="true" aria-label={`${plan?.name || 'Payment'} checkout`}><div className="relative my-auto w-full max-w-xl border border-gray-200 bg-white p-5 shadow-xl sm:p-8"><button onClick={onClose} className="absolute right-4 top-4 rounded-full px-3 py-1 text-sm text-ink/60 hover:bg-[#F4F3F3]" aria-label="Close checkout">Close</button><p className="micro">SECURE CHECKOUT BY WHOP</p><h2 className="mt-3 max-w-sm font-serif text-3xl">{plan?.name || 'Choose a service'}</h2><p className="mt-2 text-sm text-ink/65">{plan ? `$${plan.price} · one-time` : 'Select this plan in the checkout below.'}</p>
-      {plan?.id && !(planType === 'deposit' && depositPaid) ? <div className="mt-6 rounded-xl border border-ink/10 p-4"><div className="mb-4 flex gap-2 text-xs"><button className={`rounded-md px-3 py-2 ${!walletMode ? 'bg-ink text-white' : 'bg-[#F4F3F3]'}`} onClick={() => setWalletMode(false)}>Full checkout</button><button className={`rounded-md px-3 py-2 ${walletMode ? 'bg-ink text-white' : 'bg-[#F4F3F3]'}`} onClick={() => setWalletMode(true)}>Apple Pay / Google Pay</button></div><WhopElements elements={loadWhop()} appearance={{ theme: { appearance: 'light', grayColor: 'gray' } }}><Checkout plan={plan.id} returnUrl={`${typeof window !== 'undefined' ? window.location.origin : ''}/?checkout=complete`} onComplete={(result) => { if (planType === 'deposit' && result.result === 'payment') setDepositPaid(true) }}>{walletMode ? <ExpressCheckoutElement wallets={{ applePay: 'auto', googlePay: 'auto', payPal: 'never' }} /> : <CheckoutElement />}</Checkout></WhopElements><div className="mt-3 rounded-lg bg-[#F4F3F3] p-4 text-xs leading-relaxed text-ink/65">Checkout is hosted by Whop. Apple Pay and Google Pay appear when enabled for this merchant and verified for this domain. After a successful project deposit, the next step collects a saved payment method with a Whop setup intent so the final invoice can be auto-charged when authorized or sent for manual payment.</div></div> : null}
-      {plan?.id && planType === 'deposit' && depositPaid ? <div className="mt-6 rounded-xl border border-ink/10 p-4"><p className="text-sm font-medium">Deposit received. Save a payment method for the final invoice.</p><WhopElements elements={loadWhop()} appearance={{ theme: { appearance: 'light', grayColor: 'gray' } }}><SetupCardOnFile /></WhopElements><div className="mt-3"><a href="#contact" onClick={onClose} className="text-xs text-ink/60 underline">I’ll arrange the final invoice manually</a></div></div> : null}
+      {plan?.id && !(planType === 'deposit' && depositPaid) ? <div className="mt-6 rounded-xl border border-ink/10 p-4"><div className="mb-4 flex gap-2 text-xs"><button className={`rounded-md px-3 py-2 ${!walletMode ? 'bg-ink text-white' : 'bg-[#F4F3F3]'}`} onClick={() => setWalletMode(false)}>Full checkout</button><button className={`rounded-md px-3 py-2 ${walletMode ? 'bg-ink text-white' : 'bg-[#F4F3F3]'}`} onClick={() => setWalletMode(true)}>Apple Pay / Google Pay</button></div><WhopElements elements={loadWhop()} appearance={{ theme: { appearance: 'light', grayColor: 'gray' } }}><Checkout plan={plan.id} returnUrl={`${typeof window !== 'undefined' ? window.location.origin : ''}/?checkout=complete`} onComplete={(result) => { if (planType === 'deposit' && result.result === 'payment') void verifyDeposit(result.paymentId) }}>{walletMode ? <ExpressCheckoutElement wallets={{ applePay: 'auto', googlePay: 'auto', payPal: 'never' }} /> : <CheckoutElement />}</Checkout></WhopElements>{depositStatus && <p role="status" className="mt-3 text-xs text-ink/70">{depositStatus}</p>}<div className="mt-3 rounded-lg bg-[#F4F3F3] p-4 text-xs leading-relaxed text-ink/65">Whop hosts the payment fields and checkout. Apple Pay and Google Pay appear when enabled for this merchant and verified for this domain. After Whop confirms a project deposit, you can securely save a payment method for the final invoice.</div></div> : null}
+      {plan?.id && planType === 'deposit' && depositPaid ? <div className="mt-6 rounded-xl border border-ink/10 p-4"><p className="text-sm font-medium">Deposit received. Save a payment method for the final invoice.</p><WhopElements elements={loadWhop()} appearance={{ theme: { appearance: 'light', grayColor: 'gray' } }}><SetupCardOnFile depositPaymentId={depositPaymentId} /></WhopElements><div className="mt-3"><a href="#contact" onClick={onClose} className="text-xs text-ink/60 underline">I’ll arrange the final invoice manually</a></div></div> : null}
       {!plan?.id && <p className="mt-6 rounded-lg bg-[#F4F3F3] p-4 text-sm">Add this service’s Whop plan ID to <code>src/site-config.ts</code> to enable checkout.</p>}
       <p className="mt-4 text-[11px] leading-relaxed text-ink/50">Payment methods and financing options vary by merchant approval, plan, customer eligibility, and device. Wallet buttons require verified payment method domains.</p>
     </div></div>
 }
 
-function SetupCardOnFile() {
-  return <Payments accountId={site.accountId} mode="setup" currency="usd"><SetupCardForm /></Payments>
+function SetupCardOnFile({ depositPaymentId }: { depositPaymentId: string }) {
+  return <Payments accountId={site.accountId} mode="setup" currency="usd"><SetupCardForm depositPaymentId={depositPaymentId} /></Payments>
 }
 
-function SetupCardForm() {
+function SetupCardForm({ depositPaymentId }: { depositPaymentId: string }) {
   const payments = usePayments()
+  const whop = useWhop()
   const [status, setStatus] = useState('')
+  const [setupIntentId, setSetupIntentId] = useState('')
   const [busy, setBusy] = useState(false)
   const [email, setEmail] = useState('')
+  const [customerConsent, setCustomerConsent] = useState(false)
+  async function checkSetupStatus(id: string) {
+    const response = await fetch(`/api/setup-intent/status?id=${encodeURIComponent(id)}`)
+    const result = await response.json()
+    if (!response.ok) throw new Error(result.error || 'Could not verify the saved payment method.')
+    setStatus(result.status === 'succeeded'
+      ? `Payment method saved with Whop. Deposit reference: ${depositPaymentId}. The contractor can send the final invoice manually.`
+      : `Whop setup status: ${result.status}. Wait for confirmation before invoicing.`)
+  }
   async function saveCard() {
-    if (!payments) return
+    if (!payments || !customerConsent) return
     setBusy(true)
     setStatus('')
     try {
       const token = await payments.createConfirmationToken({ billingDetails: { email } })
-      const response = await fetch('/api/setup-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirmationToken: token.confirmationToken, email }) })
+      const response = await fetch('/api/setup-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirmationToken: token.confirmationToken, email, depositPaymentId, cardOnFileConsent: customerConsent }) })
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || 'Card setup did not complete.')
-      setStatus('Payment method saved with Whop. The contractor can now create the final invoice.')
+      setSetupIntentId(result.id)
+      if (result.clientSecret && whop) await whop.payments.handleNextAction({ clientSecret: result.clientSecret })
+      await checkSetupStatus(result.id)
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Card setup did not complete.')
     } finally { setBusy(false) }
   }
-  return <><label className="field-label mb-3">Email<input className="field" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label><PaymentElement /><BrandingElement /><button disabled={!payments || busy || !site.accountId || !email.includes('@')} onClick={saveCard} className="mt-4 rounded-lg bg-ink px-5 py-3 text-sm font-medium text-white disabled:opacity-40">{busy ? 'Saving…' : 'Save payment method securely'}</button>{status && <p role="status" className="mt-3 text-xs text-ink/70">{status}</p>}</>
+  return <><label className="field-label mb-3">Email<input className="field" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label><PaymentElement /><BrandingElement /><label className="mt-4 flex items-start gap-3 text-xs leading-relaxed text-ink/60"><input type="checkbox" required checked={customerConsent} onChange={(event) => setCustomerConsent(event.target.checked)} className="mt-0.5 accent-ink" />I agree to save this payment method for this project. The final balance will be sent separately as a Whop invoice for me to review and pay.</label><button disabled={!payments || busy || !site.accountId || !email.includes('@') || !customerConsent} onClick={saveCard} className="mt-4 rounded-lg bg-ink px-5 py-3 text-sm font-medium text-white disabled:opacity-40">{busy ? 'Saving…' : 'Save payment method securely'}</button>{setupIntentId && <button disabled={busy} onClick={() => void checkSetupStatus(setupIntentId).catch((error) => setStatus(error instanceof Error ? error.message : 'Could not verify the saved payment method.'))} className="ml-3 text-xs text-ink/60 underline disabled:opacity-40">Check save status</button>}{status && <p role="status" className="mt-3 text-xs text-ink/70">{status}</p>}</>
 }

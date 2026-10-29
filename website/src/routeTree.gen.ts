@@ -10,18 +10,31 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
 import { Route as ApiEstimateRouteImport } from './routes/api.estimate'
+import { Route as ApiPaymentStatusRouteImport } from './routes/api.payment-status'
 import { Route as ApiSetupIntentRouteImport } from './routes/api.setup-intent'
 import { Route as ApiAdminFinalInvoiceRouteImport } from './routes/api.admin.final-invoice'
+import { Route as ApiSetupIntentStatusRouteImport } from './routes/api.setup-intent.status'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
+  id: '/admin/invoices',
+  path: '/admin/invoices',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiEstimateRoute = ApiEstimateRouteImport.update({
   id: '/api/estimate',
   path: '/api/estimate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPaymentStatusRoute = ApiPaymentStatusRouteImport.update({
+  id: '/api/payment-status',
+  path: '/api/payment-status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSetupIntentRoute = ApiSetupIntentRouteImport.update({
@@ -34,44 +47,76 @@ const ApiAdminFinalInvoiceRoute = ApiAdminFinalInvoiceRouteImport.update({
   path: '/api/admin/final-invoice',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSetupIntentStatusRoute = ApiSetupIntentStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => ApiSetupIntentRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
   '/api/estimate': typeof ApiEstimateRoute
-  '/api/setup-intent': typeof ApiSetupIntentRoute
+  '/api/payment-status': typeof ApiPaymentStatusRoute
+  '/api/setup-intent': typeof ApiSetupIntentRouteWithChildren
   '/api/admin/final-invoice': typeof ApiAdminFinalInvoiceRoute
+  '/api/setup-intent/status': typeof ApiSetupIntentStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
   '/api/estimate': typeof ApiEstimateRoute
-  '/api/setup-intent': typeof ApiSetupIntentRoute
+  '/api/payment-status': typeof ApiPaymentStatusRoute
+  '/api/setup-intent': typeof ApiSetupIntentRouteWithChildren
   '/api/admin/final-invoice': typeof ApiAdminFinalInvoiceRoute
+  '/api/setup-intent/status': typeof ApiSetupIntentStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
   '/api/estimate': typeof ApiEstimateRoute
-  '/api/setup-intent': typeof ApiSetupIntentRoute
+  '/api/payment-status': typeof ApiPaymentStatusRoute
+  '/api/setup-intent': typeof ApiSetupIntentRouteWithChildren
   '/api/admin/final-invoice': typeof ApiAdminFinalInvoiceRoute
+  '/api/setup-intent/status': typeof ApiSetupIntentStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/api/estimate' | '/api/setup-intent' | '/api/admin/final-invoice'
+    | '/'
+    | '/admin/invoices'
+    | '/api/estimate'
+    | '/api/payment-status'
+    | '/api/setup-intent'
+    | '/api/admin/final-invoice'
+    | '/api/setup-intent/status'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/estimate' | '/api/setup-intent' | '/api/admin/final-invoice'
+  to:
+    | '/'
+    | '/admin/invoices'
+    | '/api/estimate'
+    | '/api/payment-status'
+    | '/api/setup-intent'
+    | '/api/admin/final-invoice'
+    | '/api/setup-intent/status'
   id:
     | '__root__'
     | '/'
+    | '/admin/invoices'
     | '/api/estimate'
+    | '/api/payment-status'
     | '/api/setup-intent'
     | '/api/admin/final-invoice'
+    | '/api/setup-intent/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminInvoicesRoute: typeof AdminInvoicesRoute
   ApiEstimateRoute: typeof ApiEstimateRoute
-  ApiSetupIntentRoute: typeof ApiSetupIntentRoute
+  ApiPaymentStatusRoute: typeof ApiPaymentStatusRoute
+  ApiSetupIntentRoute: typeof ApiSetupIntentRouteWithChildren
   ApiAdminFinalInvoiceRoute: typeof ApiAdminFinalInvoiceRoute
 }
 
@@ -84,11 +129,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/invoices': {
+      id: '/admin/invoices'
+      path: '/admin/invoices'
+      fullPath: '/admin/invoices'
+      preLoaderRoute: typeof AdminInvoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/estimate': {
       id: '/api/estimate'
       path: '/api/estimate'
       fullPath: '/api/estimate'
       preLoaderRoute: typeof ApiEstimateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/payment-status': {
+      id: '/api/payment-status'
+      path: '/api/payment-status'
+      fullPath: '/api/payment-status'
+      preLoaderRoute: typeof ApiPaymentStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/setup-intent': {
@@ -105,13 +164,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminFinalInvoiceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/setup-intent/status': {
+      id: '/api/setup-intent/status'
+      path: '/status'
+      fullPath: '/api/setup-intent/status'
+      preLoaderRoute: typeof ApiSetupIntentStatusRouteImport
+      parentRoute: typeof ApiSetupIntentRoute
+    }
   }
 }
 
+interface ApiSetupIntentRouteChildren {
+  ApiSetupIntentStatusRoute: typeof ApiSetupIntentStatusRoute
+}
+
+const ApiSetupIntentRouteChildren: ApiSetupIntentRouteChildren = {
+  ApiSetupIntentStatusRoute: ApiSetupIntentStatusRoute,
+}
+
+const ApiSetupIntentRouteWithChildren = ApiSetupIntentRoute._addFileChildren(
+  ApiSetupIntentRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminInvoicesRoute: AdminInvoicesRoute,
   ApiEstimateRoute: ApiEstimateRoute,
-  ApiSetupIntentRoute: ApiSetupIntentRoute,
+  ApiPaymentStatusRoute: ApiPaymentStatusRoute,
+  ApiSetupIntentRoute: ApiSetupIntentRouteWithChildren,
   ApiAdminFinalInvoiceRoute: ApiAdminFinalInvoiceRoute,
 }
 export const routeTree = rootRouteImport

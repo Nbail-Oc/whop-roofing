@@ -22,20 +22,21 @@ The current demo brand is **Boomerang Roofing**. It is intentionally a replaceab
 
 ## Whop feature flow
 
-1. **Inspection and service purchase:** each configured `plan_...` ID is mounted in a Whop `Checkout` with `CheckoutElement` and `ExpressCheckoutElement`. Whop owns the payment fields and checkout session. Wallets render only when Whop, the merchant and the verified domain allow them.
-2. **Project deposit:** the $500 one-time plan is a Whop checkout. After the successful payment callback, the same dialog mounts `Payments` in `mode="setup"` with `PaymentElement` and `BrandingElement`; the setup confirmation token is sent to the server and the server creates a Whop Setup Intent. Store the returned payment-method ID in the contractor's job record.
-3. **Final invoice:** a restricted server endpoint creates an invoice with one final-balance line item. Omitting `payment_method_id` makes it a manual-pay invoice and returns Whop's online payment URL. Supplying the saved `payt_...` method requests automatic collection. The route requires a separate admin secret so a public visitor cannot create arbitrary invoices.
+1. **Inspection and service purchase:** each configured `plan_...` ID is mounted in a Whop `Checkout`. The visitor can choose `CheckoutElement` or `ExpressCheckoutElement`; those share an exclusive entry slot in the installed Elements API. Whop owns the payment fields and checkout session. Wallets render only when Whop, the merchant and the verified domain allow them.
+2. **Project deposit:** the $500 one-time plan is a Whop checkout. After completion, the server retrieves the payment and checks that the configured deposit plan is paid. The same dialog mounts `Payments` in `mode="setup"` with `PaymentElement` and `BrandingElement`; the homeowner explicitly consents, the setup confirmation token is sent to the server, and the server creates a Whop Setup Intent. The UI follows any `handleNextAction` requirement and checks setup status. The payment-method ID stays server-side/inside Whop.
+3. **Final invoice:** the contractor uses `/admin/invoices`. A server endpoint verifies the paid deposit and creates a one-time invoice with `collection_method: "send_invoice"`, a final-balance line item, customer details and a due date. Whop emails the customer and the tool shows the Whop payment URL. Automatic charging is not implemented in this version.
 4. **Estimate lead:** the form posts to the server, which sends `POST /api/v1/leads` with the account, configured roofing product, Whop user ID, referrer and contact fields in metadata. The official API requires a Whop `user_id`; the current form exposes this as a setup prerequisite. For a public roofing website, add a supported Whop sign-in/user-resolution flow before removing that field. Never silently create a lead against a made-up user.
 5. **Pixel events:** `service_viewed` fires once when a service enters view, `deposit_started` fires on the deposit CTA, and `estimate_requested` fires only after the server confirms lead creation. Whop automatically handles website page views and checkout events.
 
 ## Configuration and data ownership
 
 - **Company-specific copy, phone/email, area, testimonials, prices, product and plan IDs:** `website/src/site-config.ts`.
-- **Company API credential:** Whop injects `WHOP_API_KEY` into its server runtime. Do not add it to client code or commit it.
+- **Company API credential:** Whop supplies server API credentials in the hosted runtime. Do not add them to client code or commit them.
 - **Whop company ID:** Whop injects `WHOP_ACCOUNT_ID` into the server runtime; it is reserved, so do not create an app secret with that name. Set the public `biz_...` identifier in `site.accountId` for browser Elements. It is an account identifier, not a credential.
 - **Lead product ID:** set `site.leadProductId` to a real product on the same company account.
 - **Plans:** create three real one-time plans on the actual Whop business and copy their `plan_...` IDs into `plans.inspection.id`, `plans.deposit.id`, and `plans.flat.id`. This workspace is not connected to a Whop business yet, so it does not claim these plans have been created.
-- **Final invoice endpoint:** set `WHOP_INVOICE_ADMIN_SECRET` using Whop's protected app secret command. Keep it in an authenticated contractor/admin tool; never expose it to a browser.
+- **Invoice product:** optionally set `site.invoiceProductId` to one existing product to reuse on every final invoice; when blank, the API creates the product inline.
+- **Final invoice tool:** set `WHOP_INVOICE_ADMIN_SECRET` as a Whop app secret. The `/admin/invoices` page accepts it at runtime and sends it only in the authorization header to the server route. The route creates a manual Whop invoice and returns its payment URL.
 
 ## Known launch gates
 
