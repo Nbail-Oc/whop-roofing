@@ -146,7 +146,7 @@ function Home() {
         <div className="grid gap-8 md:grid-cols-2 md:items-center"><div><p className="micro">WHERE WE WORK</p><h2 className="mt-4 font-serif text-4xl tracking-tight sm:text-5xl">Close to home.</h2></div><div><p className="max-w-lg text-sm leading-relaxed text-ink/70">Proudly serving {site.area}. Not sure if your address is in range? Send your ZIP code and we’ll confirm availability.</p><p className="mt-5 text-sm font-medium">{site.area}</p></div></div>
       </section>
 
-      <section id="reviews" className="section-wrap bg-[#F4F3F3] py-24 md:py-32">
+      <section id="reviews" className="section-wrap bg-[#F4F3F3] px-4 py-24 sm:px-6 md:px-8 md:py-32">
         <SectionIntro eyebrow="BUILT ON TRUST" title={<>Work you can feel<br />good about.</>} body="A roofing project should come with clear communication and a clean job site. Replace these prompts with verified customer feedback before publishing." />
         <div className="mt-12 grid gap-4 md:grid-cols-3">{site.reviewPrompts.map((item, index) => <blockquote key={item} className="border-t border-ink/20 pt-5"><p className="font-serif text-xl leading-snug">“{item}”</p><footer className="mt-6 text-xs uppercase tracking-[0.15em] text-ink/50">Verified customer review {index + 1}</footer></blockquote>)}</div>
         <div className="mt-14 grid gap-5 border-y border-ink/15 py-6 text-sm text-ink/70 sm:grid-cols-3"><p>Licensed & insured <span className="block text-xs">Add local license details</span></p><p>Workmanship warranty <span className="block text-xs">Add actual warranty terms</span></p><p>Local crew, clear scope <span className="block text-xs">Customize for your business</span></p></div>
