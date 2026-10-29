@@ -4,11 +4,11 @@ Reviewed against `instructions.md`, the existing website source, the installed W
 
 ## What the checkout warning meant
 
-The checkout modal showed that warning because all three Whop plan IDs were blank in `website/src/site-config.ts`. The three one-time variants are now created and configured. The estimate form no longer asks homeowners for a Whop user ID: the current Leads API accepts nullable `user_id` and `product_id`; the form associates the Lead with the roofing product and stores contact details in metadata.
+The checkout modal showed that warning because all three Whop plan IDs were blank in `website/src/site-config.ts`. The three one-time variants are now created and configured. The estimate API documentation marks `user_id` nullable, but the live request with `user_id: null` returned `user_id is required`. Until Whop resolves that mismatch, treat `user_id` as required and connect Whop OAuth to obtain the visitor's real ID. Do not ask homeowners to guess or enter another person's ID.
 
 ## Implementation status
 
-The source is deployed to the connected Whop Website, and the business, product, and three plan IDs are configured. Checkout and the complete payment/invoice sequence are not yet account-verified.
+The source is deployed to the connected Whop Website, and the business, product, and three plan IDs are configured. Estimate submission is currently blocked by Whop's runtime `user_id is required` response. Checkout and the complete payment/invoice sequence are not yet account-verified.
 
 - The plan checkout uses Whop's hosted `CheckoutElement` or `ExpressCheckoutElement` path. The installed Elements API documents these as an exclusive checkout entry slot, so the modal switches between standard checkout and Apple Pay/Google Pay. PayPal is disabled. `BrandingElement` is mounted with the setup-mode `PaymentElement`; Whop's full checkout surface owns its own payment/terms rendering.
 - After Whop reports checkout completion, the server retrieves the payment and requires the configured $500 deposit plan and a `paid` state before the modal opens card setup.
@@ -49,7 +49,7 @@ The source implements contractor-only invoice creation at `/api/admin/final-invo
 
 Apply for financing in the Whop dashboard. Whop documents financing as appearing automatically at checkout after merchant approval when the method and buyer are eligible; no front-end flag can force it on. Verify eligible options on the actual merchant account and the actual checkout amounts. Keep site wording conditional and avoid promising a particular lender or approval.
 
-Verify `estimate_requested`, `service_viewed`, and `deposit_started` in the Whop pixel dashboard; preserve the existing custom event names. Whop-hosted sites install the pixel and track page views/checkout activity automatically.
+Verify `estimate_requested`, `service_viewed`, and `deposit_started` in the Whop pixel dashboard; preserve the existing custom event names. `estimate_requested` only fires after the Leads API succeeds. Whop-hosted sites install the pixel and track page views/checkout activity automatically.
 
 **Exit condition:** financing approval state and actual eligible checkout methods are recorded; custom events are visible in Whop tracking; prepare the requested short screen recording only after the real flow passes.
 

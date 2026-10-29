@@ -25,7 +25,7 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 | Disable PayPal in the Express Checkout configuration | done |
 | Surface financing options for eligible approved merchants | not done |
 | Complete a sandbox checkout using Whop Elements and BrandingElement | not done |
-| Implement estimate submission to the Whop Leads API without asking anonymous homeowners to invent a user ID | done |
+| Implement estimate submission to the Whop Leads API using an authenticated visitor identity | not done |
 | Verify a submitted estimate appears as a Lead in the connected Whop account | not done |
 | Create a Whop setup intent to save a method after the deposit checkout | done |
 | Create the final Whop invoice for manual payment or auto-charge | done |
