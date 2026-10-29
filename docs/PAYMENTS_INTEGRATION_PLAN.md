@@ -4,11 +4,11 @@ Reviewed against `instructions.md`, the existing website source, the installed W
 
 ## What the checkout warning meant
 
-The checkout modal showed that warning because all three Whop plan IDs were blank in `website/src/site-config.ts`. The three one-time variants are now created and configured. The estimate API documentation marks `user_id` nullable, but the live request with `user_id: null` returned `user_id is required`. Until Whop resolves that mismatch, treat `user_id` as required and connect Whop OAuth to obtain the visitor's real ID. Do not ask homeowners to guess or enter another person's ID.
+The checkout modal showed that warning because all three Whop plan IDs were blank in `website/src/site-config.ts`. The three one-time variants are now created and configured. The estimate API documentation marks `user_id` nullable, but the live request with `user_id: null` returned `user_id is required`. The demo route now sends the signed-in business owner's ID as a temporary fallback. This will attribute every request to the owner, not the visitor; replace it with visitor OAuth or a Whop-supported guest Lead flow before accepting real prospects.
 
 ## Implementation status
 
-The source is deployed to the connected Whop Website, and the business, product, and three plan IDs are configured. Estimate submission is currently blocked by Whop's runtime `user_id is required` response. Checkout and the complete payment/invoice sequence are not yet account-verified.
+The source is deployed to the connected Whop Website, and the business, product, and three plan IDs are configured. The Leads route has a temporary hardcoded owner identity; a successful Lead submission has not yet been verified. Checkout and the complete payment/invoice sequence are not yet account-verified.
 
 - The plan checkout uses Whop's hosted `CheckoutElement` or `ExpressCheckoutElement` path. The installed Elements API documents these as an exclusive checkout entry slot, so the modal switches between standard checkout and Apple Pay/Google Pay. PayPal is disabled. `BrandingElement` is mounted with the setup-mode `PaymentElement`; Whop's full checkout surface owns its own payment/terms rendering.
 - After Whop reports checkout completion, the server retrieves the payment and requires the configured $500 deposit plan and a `paid` state before the modal opens card setup.

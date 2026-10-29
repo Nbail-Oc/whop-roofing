@@ -25,7 +25,7 @@ The current demo brand is **Boomerang Roofing**. Its Denver service area and 303
 1. **Inspection and service purchase:** each configured `plan_...` ID is mounted in a Whop `Checkout`. The visitor can choose `CheckoutElement` or `ExpressCheckoutElement`; those share an exclusive entry slot in the installed Elements API. Whop owns the payment fields and checkout session. Wallets render only when Whop, the merchant and the verified domain allow them.
 2. **Project deposit:** the $500 one-time plan is a Whop checkout. After completion, the server retrieves the payment and checks that the configured deposit plan is paid. The same dialog mounts `Payments` in `mode="setup"` with `PaymentElement` and `BrandingElement`; the homeowner explicitly consents, the setup confirmation token is sent to the server, and the server creates a Whop Setup Intent. The UI follows any `handleNextAction` requirement and checks setup status. The payment-method ID stays server-side/inside Whop.
 3. **Final invoice:** the contractor uses `/admin/invoices`. A server endpoint verifies the paid deposit and creates a one-time invoice with `collection_method: "send_invoice"`, a final-balance line item, customer details and a due date. Whop emails the customer and the tool shows the Whop payment URL. Automatic charging is not implemented in this version.
-4. **Estimate lead:** the form posts to the server, which sends `POST /api/v1/leads` with the account, configured roofing product, referrer and contact fields in metadata. Although the API schema marks `user_id` nullable, the live API returned `user_id is required` when this site sent null. Add Whop OAuth and pass the authenticated visitor's actual ID before calling the Leads API; do not ask visitors to type an ID.
+4. **Estimate lead:** the form posts to the server, which sends `POST /api/v1/leads` with the account, configured roofing product, referrer and contact fields in metadata. The demo currently hardcodes the business owner's Whop user ID to satisfy the live endpoint's non-null requirement. That misattributes all estimates to the owner; replace it with authenticated visitor identity or a Whop-supported guest Lead flow before real use.
 5. **Pixel events:** `service_viewed` fires once when a service enters view, `deposit_started` fires on the deposit CTA, and `estimate_requested` fires only after the server confirms lead creation. Whop automatically handles website page views and checkout events.
 
 ## Configuration and data ownership
@@ -41,7 +41,7 @@ The current demo brand is **Boomerang Roofing**. Its Denver service area and 303
 ## Known launch gates
 
 - Merchant payment onboarding is incomplete; verify account eligibility before taking real payments or promising financing.
-- Anonymous Lead submission currently fails because the live API requires `user_id`; add and verify visitor OAuth before launch.
+- Demo Lead submissions use the hardcoded business-owner ID and are not verified. Replace it with visitor identity or a supported guest Lead flow before launch.
 - The Whop account/payment environment is not yet verified for the US roofing use case.
 - Whop Elements sandbox is documented as not generally available. A completed sandbox charge cannot be honestly claimed until Whop enables sandbox for this account. Production checkout or real charges must not be used as a substitute test without the business owner's explicit acceptance.
 - Whop's current website hosting quickstart refers to `*.whop.site` domains. A whop.app URL is not promised by the CLI documentation.

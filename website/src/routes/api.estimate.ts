@@ -2,6 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { site } from '../site-config'
 import { whopPost } from '../server/whop'
 
+// Demo only: Leads are attributed to the signed-in business owner until visitor OAuth is implemented.
+const demoLeadUserId = 'user_EdlbQktpqyGJu'
+
 export const Route = createFileRoute('/api/estimate')({
   server: {
     handlers: {
@@ -14,7 +17,7 @@ export const Route = createFileRoute('/api/estimate')({
           const postalCode = String(body.postalCode || '').trim().slice(0, 20)
           if (!name || !email || !service || !postalCode) return Response.json({ error: 'Name, email, service, and ZIP code are required.' }, { status: 400 })
           const lead = await whopPost('/leads', {
-            user_id: null,
+            user_id: demoLeadUserId,
             product_id: site.leadProductId || null,
             referrer: request.headers.get('referer') || '',
             metadata: {

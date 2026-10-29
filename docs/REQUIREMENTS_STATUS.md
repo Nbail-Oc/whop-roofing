@@ -25,6 +25,7 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 | Disable PayPal in the Express Checkout configuration | done |
 | Surface financing options for eligible approved merchants | not done |
 | Complete a sandbox checkout using Whop Elements and BrandingElement | not done |
+| Use a temporary hardcoded business-owner user ID for demo Leads submissions | done |
 | Implement estimate submission to the Whop Leads API using an authenticated visitor identity | not done |
 | Verify a submitted estimate appears as a Lead in the connected Whop account | not done |
 | Create a Whop setup intent to save a method after the deposit checkout | done |
@@ -47,3 +48,5 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 ## Whop feature summary
 
 The live Whop Website is [boomerang-roofing.whop.site](https://boomerang-roofing.whop.site) (app `app_8YZgDz7emvrsE0`). The CLI's documented hosted domain is `whop.site`; the requested `whop.app` hostname is not available through this CLI flow. Real one-time Whop plans are configured for the $149 roof inspection (`plan_OSx3AsLPE0dFZ`), $500 project deposit (`plan_icqTxoMo6e35c`), and $299 leak repair visit (`plan_KIjflGrjbykJC`). Source includes Whop Elements checkout with Apple Pay/Google Pay Express Checkout, a post-deposit setup-intent flow with customer consent and server status verification, a contractor-only manual invoice tool using the Whop Invoices API, estimate Lead submission, and the three custom pixel events. Payment onboarding, Leads API result, checkout, setup intent, invoice, financing approval, and pixel-event verification remain account-level gates. Automatic invoice charges are intentionally not included; the implemented invoice collection method is `send_invoice`.
+
+The Leads route temporarily uses the signed-in business owner's Whop user ID (`user_EdlbQktpqyGJu`) so demo submissions can pass a non-null identity. Every submission is therefore attributed to the owner, not the actual homeowner. Replace it with visitor OAuth before using the form with real prospects; do not mark anonymous/customer Leads verified until a successful test appears in the account.
