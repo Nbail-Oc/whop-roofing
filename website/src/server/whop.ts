@@ -23,11 +23,14 @@ async function whopRequest(path: string, init: RequestInit = {}) {
   return result
 }
 
-export function whopPost(path: string, body: Record<string, unknown>, idempotencyKey?: string) {
+export function whopPost(path: string, body: Record<string, unknown>, idempotencyKey?: string, apiVersionDate?: string, includeAccountId = true) {
   return whopRequest(path, {
     method: 'POST',
-    headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
-    body: JSON.stringify({ ...body, account_id: whopAccountId() }),
+    headers: {
+      ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
+      ...(apiVersionDate ? { 'Api-Version-Date': apiVersionDate } : {}),
+    },
+    body: JSON.stringify(includeAccountId ? { ...body, account_id: whopAccountId() } : body),
   })
 }
 

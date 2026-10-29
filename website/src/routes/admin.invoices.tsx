@@ -11,7 +11,7 @@ function InvoiceAdmin() {
   const [amount, setAmount] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [invoice, setInvoice] = useState<{ id: string; payOnlineUrl?: string } | null>(null)
+  const [invoice, setInvoice] = useState<{ id: string; checkoutLink?: string; status?: string; sent: boolean; error?: string } | null>(null)
 
   async function createInvoice(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -51,7 +51,7 @@ function InvoiceAdmin() {
         <label className="field-label">Final balance (USD)<input className="field" type="number" min="0.01" step="0.01" inputMode="decimal" required value={amount} onChange={(event) => setAmount(event.target.value)} /><span className="font-normal text-ink/50">Enter the remaining amount after subtracting the $500 deposit from the approved project total.</span></label>
         <button disabled={busy} className="w-fit rounded-lg bg-ink px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-ink/90 disabled:opacity-50">{busy ? 'Creating invoice…' : 'Create and email invoice'}</button>
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-        {invoice && <div role="status" className="border border-ink/10 bg-[#F4F3F3] p-5 text-sm"><p className="font-medium">Whop invoice {invoice.id} created and sent.</p>{invoice.payOnlineUrl && <a className="mt-3 inline-block underline" href={invoice.payOnlineUrl} target="_blank" rel="noreferrer">Open customer payment page</a>}</div>}
+        {invoice && <div role="status" className="border border-ink/10 bg-[#F4F3F3] p-5 text-sm"><p className="font-medium">Whop invoice {invoice.id} {invoice.sent ? 'was sent to the customer.' : 'was created but not emailed.'}</p>{invoice.error && <p className="mt-2 text-red-700">{invoice.error}</p>}{invoice.checkoutLink && <a className="mt-3 inline-block underline" href={invoice.checkoutLink} target="_blank" rel="noreferrer">Open customer payment page</a>}</div>}
       </form>
     </div>
   </main>
