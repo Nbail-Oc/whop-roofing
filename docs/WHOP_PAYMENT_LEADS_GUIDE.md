@@ -4,15 +4,7 @@ Checked against Whop's current documentation on 2026-10-29.
 
 ## Lead form: email is not user ID
 
-The estimate form's **Email** field is the customer's contact address. Whop's Leads API `user_id` identifies a Whop account and has the form `user_…`; it cannot be replaced with an email address. The API reference currently marks `user_id` nullable and says an authenticated user's identity is used automatically. In this app, an anonymous request with a null ID returned `user_id is required`, so the form uses Whop OAuth/OIDC (`openid`) with PKCE and passes the verified `sub` claim as `user_id`. Contact details stay in Lead metadata. A homeowner needs a Whop account and must authorize this identity flow. Do not use the roofing company's owner ID as the homeowner ID.
-
-The app callback URL is configured as:
-
-```text
-https://boomerang-roofing.whop.site/api/estimate/oauth/callback
-```
-
-The OAuth app uses the public client type, PKCE, state, and nonce; the login access token stays in a Secure, HttpOnly, SameSite cookie. The OAuth login and a submitted Lead still need a live account verification. If the company does not want its customers to sign in to Whop, the public Leads API flow is not a fit for anonymous estimates; use an email/CRM lead intake for the form instead, while keeping Whop checkout for payment.
+The estimate form's **Email** field is the customer's contact address. Whop's Leads API `user_id` identifies a Whop account and has the form `user_…`; it cannot be replaced with an email address. The API reference currently marks `user_id` nullable and says an authenticated user's identity is used automatically. In this app, an anonymous request with a null ID returned `user_id is required`, so the MVP temporarily sends the site owner's user ID (`user_EdlbQktpqyGJu`). This allows visitors to submit without Whop sign-in, but every Lead is associated with the site owner; homeowner name/email/phone/service/details are kept in Lead metadata. This is for testing only. Replace it with a supported visitor identity or another CRM lead intake before using the template for real roofing customers.
 
 ## Checkout and sandbox
 

@@ -16,8 +16,6 @@ import { Route as ApiPaymentStatusRouteImport } from './routes/api.payment-statu
 import { Route as ApiSetupIntentRouteImport } from './routes/api.setup-intent'
 import { Route as ApiAdminFinalInvoiceRouteImport } from './routes/api.admin.final-invoice'
 import { Route as ApiSetupIntentStatusRouteImport } from './routes/api.setup-intent.status'
-import { Route as ApiEstimateOauthCallbackRouteImport } from './routes/api.estimate.oauth.callback'
-import { Route as ApiEstimateOauthStartRouteImport } from './routes/api.estimate.oauth.start'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -54,51 +52,34 @@ const ApiSetupIntentStatusRoute = ApiSetupIntentStatusRouteImport.update({
   path: '/status',
   getParentRoute: () => ApiSetupIntentRoute,
 } as any)
-const ApiEstimateOauthCallbackRoute =
-  ApiEstimateOauthCallbackRouteImport.update({
-    id: '/oauth/callback',
-    path: '/oauth/callback',
-    getParentRoute: () => ApiEstimateRoute,
-  } as any)
-const ApiEstimateOauthStartRoute = ApiEstimateOauthStartRouteImport.update({
-  id: '/oauth/start',
-  path: '/oauth/start',
-  getParentRoute: () => ApiEstimateRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin/invoices': typeof AdminInvoicesRoute
-  '/api/estimate': typeof ApiEstimateRouteWithChildren
+  '/api/estimate': typeof ApiEstimateRoute
   '/api/payment-status': typeof ApiPaymentStatusRoute
   '/api/setup-intent': typeof ApiSetupIntentRouteWithChildren
   '/api/admin/final-invoice': typeof ApiAdminFinalInvoiceRoute
   '/api/setup-intent/status': typeof ApiSetupIntentStatusRoute
-  '/api/estimate/oauth/callback': typeof ApiEstimateOauthCallbackRoute
-  '/api/estimate/oauth/start': typeof ApiEstimateOauthStartRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/invoices': typeof AdminInvoicesRoute
-  '/api/estimate': typeof ApiEstimateRouteWithChildren
+  '/api/estimate': typeof ApiEstimateRoute
   '/api/payment-status': typeof ApiPaymentStatusRoute
   '/api/setup-intent': typeof ApiSetupIntentRouteWithChildren
   '/api/admin/final-invoice': typeof ApiAdminFinalInvoiceRoute
   '/api/setup-intent/status': typeof ApiSetupIntentStatusRoute
-  '/api/estimate/oauth/callback': typeof ApiEstimateOauthCallbackRoute
-  '/api/estimate/oauth/start': typeof ApiEstimateOauthStartRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin/invoices': typeof AdminInvoicesRoute
-  '/api/estimate': typeof ApiEstimateRouteWithChildren
+  '/api/estimate': typeof ApiEstimateRoute
   '/api/payment-status': typeof ApiPaymentStatusRoute
   '/api/setup-intent': typeof ApiSetupIntentRouteWithChildren
   '/api/admin/final-invoice': typeof ApiAdminFinalInvoiceRoute
   '/api/setup-intent/status': typeof ApiSetupIntentStatusRoute
-  '/api/estimate/oauth/callback': typeof ApiEstimateOauthCallbackRoute
-  '/api/estimate/oauth/start': typeof ApiEstimateOauthStartRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -110,8 +91,6 @@ export interface FileRouteTypes {
     | '/api/setup-intent'
     | '/api/admin/final-invoice'
     | '/api/setup-intent/status'
-    | '/api/estimate/oauth/callback'
-    | '/api/estimate/oauth/start'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -121,8 +100,6 @@ export interface FileRouteTypes {
     | '/api/setup-intent'
     | '/api/admin/final-invoice'
     | '/api/setup-intent/status'
-    | '/api/estimate/oauth/callback'
-    | '/api/estimate/oauth/start'
   id:
     | '__root__'
     | '/'
@@ -132,14 +109,12 @@ export interface FileRouteTypes {
     | '/api/setup-intent'
     | '/api/admin/final-invoice'
     | '/api/setup-intent/status'
-    | '/api/estimate/oauth/callback'
-    | '/api/estimate/oauth/start'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
-  ApiEstimateRoute: typeof ApiEstimateRouteWithChildren
+  ApiEstimateRoute: typeof ApiEstimateRoute
   ApiPaymentStatusRoute: typeof ApiPaymentStatusRoute
   ApiSetupIntentRoute: typeof ApiSetupIntentRouteWithChildren
   ApiAdminFinalInvoiceRoute: typeof ApiAdminFinalInvoiceRoute
@@ -196,36 +171,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSetupIntentStatusRouteImport
       parentRoute: typeof ApiSetupIntentRoute
     }
-    '/api/estimate/oauth/callback': {
-      id: '/api/estimate/oauth/callback'
-      path: '/oauth/callback'
-      fullPath: '/api/estimate/oauth/callback'
-      preLoaderRoute: typeof ApiEstimateOauthCallbackRouteImport
-      parentRoute: typeof ApiEstimateRoute
-    }
-    '/api/estimate/oauth/start': {
-      id: '/api/estimate/oauth/start'
-      path: '/oauth/start'
-      fullPath: '/api/estimate/oauth/start'
-      preLoaderRoute: typeof ApiEstimateOauthStartRouteImport
-      parentRoute: typeof ApiEstimateRoute
-    }
   }
 }
-
-interface ApiEstimateRouteChildren {
-  ApiEstimateOauthCallbackRoute: typeof ApiEstimateOauthCallbackRoute
-  ApiEstimateOauthStartRoute: typeof ApiEstimateOauthStartRoute
-}
-
-const ApiEstimateRouteChildren: ApiEstimateRouteChildren = {
-  ApiEstimateOauthCallbackRoute: ApiEstimateOauthCallbackRoute,
-  ApiEstimateOauthStartRoute: ApiEstimateOauthStartRoute,
-}
-
-const ApiEstimateRouteWithChildren = ApiEstimateRoute._addFileChildren(
-  ApiEstimateRouteChildren,
-)
 
 interface ApiSetupIntentRouteChildren {
   ApiSetupIntentStatusRoute: typeof ApiSetupIntentStatusRoute
@@ -242,7 +189,7 @@ const ApiSetupIntentRouteWithChildren = ApiSetupIntentRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
-  ApiEstimateRoute: ApiEstimateRouteWithChildren,
+  ApiEstimateRoute: ApiEstimateRoute,
   ApiPaymentStatusRoute: ApiPaymentStatusRoute,
   ApiSetupIntentRoute: ApiSetupIntentRouteWithChildren,
   ApiAdminFinalInvoiceRoute: ApiAdminFinalInvoiceRoute,

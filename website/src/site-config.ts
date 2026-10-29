@@ -7,6 +7,8 @@ export const site = {
   phone: '(303) 555-0147 (demo number)',
   email: 'thangenabil@gmail.com',
   accountId: 'biz_i7AWdtROMztPLW',
+  // MVP only: this attaches every estimate lead to the site owner's Whop profile.
+  leadUserId: 'user_EdlbQktpqyGJu',
   leadProductId: 'prod_qlAtWqkVzmYze',
   invoiceProductId: 'prod_qlAtWqkVzmYze',
   heroVideo: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260715_090628_7052d8a6-a094-4341-a4a2-ad58493a67a9.mp4',
