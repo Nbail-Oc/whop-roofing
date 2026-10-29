@@ -1,0 +1,19 @@
+# Dependencies and generated output
+website/node_modules/
+website/dist/
+website/.tanstack/
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Local editor and operating-system files
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+npm-debug.log*
+
+# Source ZIPs are generated deliverables; the repository itself is the source handoff.
+*.zip

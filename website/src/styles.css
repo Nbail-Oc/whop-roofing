@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #191919;
+  --font-sans: Inter, sans-serif;
+  --font-serif: 'P22 Mackinac W01 Book', Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+html, body, #app { min-height: 100%; }
+body { margin: 0; background: #fff; color: #191919; font-family: Inter, sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; }
+.section-wrap { width: min(100% - 3rem, 1280px); margin-inline: auto; }
+.micro { font-size: 11px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgb(25 25 25 / .5); }
+.field-label { display: grid; gap: .55rem; font-size: .75rem; font-weight: 500; color: rgb(25 25 25 / .75); }
+.field { width: 100%; border: 1px solid rgb(25 25 25 / .18); border-radius: .35rem; background: white; padding: .8rem .85rem; font-size: .875rem; color: #191919; outline: none; transition: border-color 160ms ease; }
+.field:focus { border-color: #191919; }
+@media (max-width: 640px) { .section-wrap { width: min(100% - 2rem, 1280px); } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
