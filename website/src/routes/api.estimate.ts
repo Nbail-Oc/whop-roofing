@@ -10,15 +10,12 @@ export const Route = createFileRoute('/api/estimate')({
           const body = await request.json() as Record<string, unknown>
           const name = String(body.name || '').trim().slice(0, 120)
           const email = String(body.email || '').trim().slice(0, 254)
-          const userId = String(body.userId || '').trim()
           const service = String(body.service || '').trim().slice(0, 80)
           const postalCode = String(body.postalCode || '').trim().slice(0, 20)
           if (!name || !email || !service || !postalCode) return Response.json({ error: 'Name, email, service, and ZIP code are required.' }, { status: 400 })
-          if (!userId) return Response.json({ error: 'Whop requires a user_id to create a Lead. Connect Whop sign-in or collect an existing Whop user ID before enabling this form.' }, { status: 400 })
-          if (!site.leadProductId) return Response.json({ error: 'Set the estimate lead product ID in src/site-config.ts first.' }, { status: 503 })
           const lead = await whopPost('/leads', {
-            user_id: userId,
-            product_id: site.leadProductId,
+            user_id: null,
+            product_id: site.leadProductId || null,
             referrer: request.headers.get('referer') || '',
             metadata: {
               name,

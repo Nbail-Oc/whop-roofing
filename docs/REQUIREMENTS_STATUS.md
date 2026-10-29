@@ -6,8 +6,9 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 
 | Requirement | Status |
 | --- | --- |
-| Build and deploy a Whop Website with Whop CLI or Whop AI | not done |
+| Build and deploy a Whop Website with Whop CLI or Whop AI | done |
 | Provide a live `whop.app` URL | not done |
+| Deploy at the live domain supported by the Whop Website CLI (`whop.site`) | done |
 | Include repair, replacement, inspection, service area, financing, trust/reviews, and contact sections | done |
 | Set the service area to USA | done |
 | Create real Whop one-time plans for the $149 inspection, $500 deposit, and one flat-rate service | not done |
@@ -24,7 +25,8 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 | Disable PayPal in the Express Checkout configuration | done |
 | Surface financing options for eligible approved merchants | not done |
 | Complete a sandbox checkout using Whop Elements and BrandingElement | not done |
-| Submit estimate requests as Leads on the connected Whop account | not done |
+| Implement estimate submission to the Whop Leads API without asking anonymous homeowners to invent a user ID | done |
+| Verify a submitted estimate appears as a Lead in the connected Whop account | not done |
 | Create a Whop setup intent to save a method after the deposit checkout | done |
 | Create the final Whop invoice for manual payment or auto-charge | done |
 | Complete and verify the deposit → saved method → final invoice flow in Whop | not done |
@@ -44,4 +46,4 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 
 ## Whop feature summary
 
-The source integrates Whop's hosted checkout with Apple Pay/Google Pay Express Checkout, a post-deposit setup-intent flow with customer consent and server status verification, and a contractor-only manual invoice tool using the Whop Invoices API. It also includes estimate Lead submission code and the three custom pixel events. The live business, plans, Lead submission, checkout, invoice, financing approval, and event verification still need to be configured or verified in a connected Whop business. Automatic invoice charges are intentionally not included; the implemented invoice collection method is `send_invoice`.
+The live Whop Website is [boomerang-roofing.whop.site](https://boomerang-roofing.whop.site) (app `app_8YZgDz7emvrsE0`). The CLI's documented hosted domain is `whop.site`; the requested `whop.app` hostname is not available through this CLI flow. Source includes Whop Elements checkout with Apple Pay/Google Pay Express Checkout, a post-deposit setup-intent flow with customer consent and server status verification, a contractor-only manual invoice tool using the Whop Invoices API, estimate Lead submission, and the three custom pixel events. The real plans, payment onboarding, Leads API result, checkout, setup intent, invoice, financing approval, and pixel-event verification remain account-level gates. Automatic invoice charges are intentionally not included; the implemented invoice collection method is `send_invoice`.

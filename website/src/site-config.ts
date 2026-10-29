@@ -1,5 +1,5 @@
 // Swap this single configuration file when adapting the site to another roofer.
-// Whop account and plan IDs are deliberately blank until the business is connected.
+// Whop injects the business account ID at runtime; configure real plan IDs before selling.
 export const site = {
   name: 'Boomerang Roofing',
   hero: 'Roof repair, replacement, and inspections from a local crew that treats your home with care.',
