@@ -4,7 +4,7 @@
 
 Keep the supplied Boomerang reference's editorial feel: P22 Mackinac serif display type, Inter interface type, pure white background, charcoal controls, light gray surfaces, fine rules, and architectural motion in the hero. The first viewport is a complete brand moment with a full-bleed roof video and a bottom anchored overview panel. Added sections use generous whitespace and typography instead of a generic card-heavy contractor theme.
 
-The current demo brand is **Boomerang Roofing**. It is intentionally a replaceable sample name. The page does not claim a real license, warranty, service address, phone number, review, or customer result. Before pitching or publishing for a real roofer, replace every square-bracket prompt and replace the review prompts with approved, verifiable quotes.
+The current demo brand is **Boomerang Roofing**. Its Denver service area and 303-555 phone are sample values, and the supplied Gmail address is configured as the contact email. The trust section uses general process copy rather than fabricated reviews, licenses, insurance, or warranty claims. Before a roofer adopts the template, replace the demo name, contact details, service area, and sample prices with verified business information.
 
 ## Sections and content
 
