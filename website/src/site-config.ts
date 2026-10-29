@@ -6,9 +6,9 @@ export const site = {
   area: 'USA',
   phone: '[Your phone number]',
   email: 'hello@example.com',
-  accountId: '',
-  leadProductId: '',
-  invoiceProductId: '',
+  accountId: 'biz_i7AWdtROMztPLW',
+  leadProductId: 'prod_qlAtWqkVzmYze',
+  invoiceProductId: 'prod_qlAtWqkVzmYze',
   heroVideo: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260715_090628_7052d8a6-a094-4341-a4a2-ad58493a67a9.mp4',
   checkoutUrl: '#contact',
   reviewPrompts: [
@@ -25,7 +25,7 @@ export const services = [
 ] as const
 
 export const plans = {
-  inspection: { name: 'Roof inspection', price: 149, id: '' },
-  deposit: { name: 'Project deposit', price: 500, id: '' },
-  flat: { name: 'Leak repair visit', price: 299, description: 'template example price; define covered work', id: '' },
+  inspection: { name: 'Roof inspection', price: 149, id: 'plan_OSx3AsLPE0dFZ' },
+  deposit: { name: 'Project deposit', price: 500, id: 'plan_icqTxoMo6e35c' },
+  flat: { name: 'Leak repair visit', price: 299, description: 'Flat-rate leak repair visit. Confirm covered work and exclusions before booking.', id: 'plan_KIjflGrjbykJC' },
 } as const

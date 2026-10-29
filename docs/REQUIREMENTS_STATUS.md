@@ -11,7 +11,7 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 | Deploy at the live domain supported by the Whop Website CLI (`whop.site`) | done |
 | Include repair, replacement, inspection, service area, financing, trust/reviews, and contact sections | done |
 | Set the service area to USA | done |
-| Create real Whop one-time plans for the $149 inspection, $500 deposit, and one flat-rate service | not done |
+| Create real Whop one-time plans for the $149 inspection, $500 deposit, and one flat-rate service | done |
 | Keep company copy, service content, and prices reusable through configuration | done |
 | Use original code rather than a cloned marketplace theme | done |
 | Implement responsive layouts for mobile and desktop | done |
@@ -39,11 +39,11 @@ Statuses reflect what is implemented and verifiable as of 2026-10-29. `done` mea
 | Requirement | Status |
 | --- | --- |
 | Provide the source code in a GitHub repository or ZIP | done |
-| Provide a live URL | not done |
+| Provide a live Whop-hosted URL (`whop.site`) | done |
 | Push the source code to the requested GitHub repository | done |
 | Record the 3–5 minute end-to-end demo | not done |
 | Provide a paragraph listing implemented Whop features | done |
 
 ## Whop feature summary
 
-The live Whop Website is [boomerang-roofing.whop.site](https://boomerang-roofing.whop.site) (app `app_8YZgDz7emvrsE0`). The CLI's documented hosted domain is `whop.site`; the requested `whop.app` hostname is not available through this CLI flow. Source includes Whop Elements checkout with Apple Pay/Google Pay Express Checkout, a post-deposit setup-intent flow with customer consent and server status verification, a contractor-only manual invoice tool using the Whop Invoices API, estimate Lead submission, and the three custom pixel events. The real plans, payment onboarding, Leads API result, checkout, setup intent, invoice, financing approval, and pixel-event verification remain account-level gates. Automatic invoice charges are intentionally not included; the implemented invoice collection method is `send_invoice`.
+The live Whop Website is [boomerang-roofing.whop.site](https://boomerang-roofing.whop.site) (app `app_8YZgDz7emvrsE0`). The CLI's documented hosted domain is `whop.site`; the requested `whop.app` hostname is not available through this CLI flow. Real one-time Whop plans are configured for the $149 roof inspection (`plan_OSx3AsLPE0dFZ`), $500 project deposit (`plan_icqTxoMo6e35c`), and $299 leak repair visit (`plan_KIjflGrjbykJC`). Source includes Whop Elements checkout with Apple Pay/Google Pay Express Checkout, a post-deposit setup-intent flow with customer consent and server status verification, a contractor-only manual invoice tool using the Whop Invoices API, estimate Lead submission, and the three custom pixel events. Payment onboarding, Leads API result, checkout, setup intent, invoice, financing approval, and pixel-event verification remain account-level gates. Automatic invoice charges are intentionally not included; the implemented invoice collection method is `send_invoice`.

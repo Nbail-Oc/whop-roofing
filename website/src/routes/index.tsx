@@ -128,7 +128,7 @@ function Home() {
       </section>
 
       <section id="pricing" className="section-wrap bg-[#F4F3F3] py-24 md:py-32">
-        <SectionIntro eyebrow="STRAIGHTFORWARD PRICING" title={<>Clear prices.<br />A clear next step.</>} body="Book a one-time inspection, reserve a project start with a $500 deposit, or choose the example repair visit. Your written scope confirms the full job price before work begins." />
+        <SectionIntro eyebrow="STRAIGHTFORWARD PRICING" title={<>Clear prices.<br />A clear next step.</>} body="Book a one-time inspection, reserve a project start with a $500 deposit, or choose the flat-rate repair visit. Your written scope confirms the full job price before work begins." />
         <div className="mt-12 grid gap-5 md:grid-cols-[1fr_1.08fr_1fr]">
           <PriceCard name="Roof inspection" price="$149" note="One-time · includes a written condition report" button="Book inspection" onClick={() => setModalPlan('inspection')} />
           <PriceCard name="Project deposit" price="$500" note="One-time · credited toward your approved scope" button="Start a project" onClick={startDeposit} featured />

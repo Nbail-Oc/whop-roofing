@@ -2,13 +2,13 @@
 
 Reviewed against `instructions.md`, the existing website source, the installed Whop Elements types, and Whop's official documentation on 2026-10-29.
 
-## What the screenshot field means
+## What the checkout warning meant
 
-The `Whop user ID` field is **not** an environment variable and it is not the roofing business's Whop ID. It asks for the individual homeowner's Whop user ID so the Leads API can attach a lead to that person. A homeowner will not normally know this value. Do not put the business ID, a made-up ID, or one shared ID in this field. The public form needs a supported visitor identity flow (Whop hosting docs point to OAuth) or a different supported way to create the lead. This is separate from checkout and invoicing and is not a prerequisite for the payment work below.
+The checkout modal showed that warning because all three Whop plan IDs were blank in `website/src/site-config.ts`. The three one-time variants are now created and configured. The estimate form no longer asks homeowners for a Whop user ID: the current Leads API accepts nullable `user_id` and `product_id`; the form associates the Lead with the roofing product and stores contact details in metadata.
 
 ## Implementation status
 
-The source now implements the local payment and manual-invoice sequence. It is not yet a live, account-verified flow because the authenticated Whop CLI has no business account and the business/product/plan IDs are blank.
+The source is deployed to the connected Whop Website, and the business, product, and three plan IDs are configured. Checkout and the complete payment/invoice sequence are not yet account-verified.
 
 - The plan checkout uses Whop's hosted `CheckoutElement` or `ExpressCheckoutElement` path. The installed Elements API documents these as an exclusive checkout entry slot, so the modal switches between standard checkout and Apple Pay/Google Pay. PayPal is disabled. `BrandingElement` is mounted with the setup-mode `PaymentElement`; Whop's full checkout surface owns its own payment/terms rendering.
 - After Whop reports checkout completion, the server retrieves the payment and requires the configured $500 deposit plan and a `paid` state before the modal opens card setup.
@@ -21,9 +21,9 @@ The source now implements the local payment and manual-invoice sequence. It is n
 
 ### 1. Connect the real Whop business
 
-Before checkout testing, select/create the roofing business in Whop, finish business and payout onboarding, and confirm the account can accept the intended payments. Create the real one-time $149 inspection plan, $500 deposit plan, and agreed flat-rate service plan. Put their IDs, business-owned product ID, and public `biz_...` ID in the template configuration; Whop provides `WHOP_ACCOUNT_ID` and `WHOP_API_KEY` to the server runtime, so do not create app secrets for those reserved runtime values. Keep any additional credential (such as the admin-only invoice secret) in protected app secrets, never in client code. Verify the actual domain and wallet domain requirements.
+Before real customer payments, finish business and payout onboarding and confirm the account can accept the intended payments. The demo plans ($149 inspection, $500 deposit, $299 flat-rate leak repair) and product are created on the connected business, and their IDs are in `website/src/site-config.ts`. When adapting the template, replace these with IDs from the target business. Whop injects `WHOP_ACCOUNT_ID` and API authentication into the hosted runtime; do not create app secrets with reserved names. Keep additional credentials such as the invoice admin secret in protected app secrets, never client code. Verify the actual domain and wallet domain requirements.
 
-**Exit condition:** configured `biz_`, product, and three `plan_` IDs belong to that business; each plan is one-time and shows its expected amount in Whop.
+**Exit condition: done.** The connected product has three visible one-time USD plans at the expected prices. Complete payment onboarding and test actual checkout before treating these plans as ready for customer use.
 
 ### 2. Finish the Whop checkout surface
 
